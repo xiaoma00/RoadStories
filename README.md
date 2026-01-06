@@ -64,25 +64,19 @@ RoadStories 是一款基于人工智能的智能旅游伴侣应用，通过输�
    npm install
    ```
 
-3. **配置 API Key**
-   
-   前往 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取 API Key
-   
-   在应用中点击设置按钮 (⚙️) 输入你的 API Key
-
-4. **启动开发服务器**
+3. **启动开发服务器**
    ```bash
    npm run dev
    ```
    
    应用将在 http://localhost:5173 启动
 
-5. **构建生产版本**
+4. **构建生产版本**
    ```bash
    npm run build
    ```
 
-6. **预览生产版本**
+5. **预览生产版本**
    ```bash
    npm run preview
    ```
@@ -108,8 +102,12 @@ RoadStories 是一款基于人工智能的智能旅游伴侣应用，通过输�
 
 ## 🔑 API 配置
 
-应用需要以下 Google API 服务：
+应用已预配置 Google AI API Key，可以直接使用。如需自定义 API Key：
 
+1. 前往 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取 API Key
+2. 在应用中点击设置按钮 (⚙️) 输入你的自定义 API Key
+
+### 所需服务：
 - **Gemini API**: 用于生成旅游路线和文本内容
 - **Gemini TTS API**: 用于语音合成
 - **Imagen API**: 用于生成景点图片
