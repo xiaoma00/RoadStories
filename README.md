@@ -64,19 +64,25 @@ RoadStories 是一款基于人工智能的智能旅游伴侣应用，通过输�
    npm install
    ```
 
-3. **启动开发服务器**
+3. **配置 API Key**
+   
+   前往 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取 API Key
+   
+   在应用中点击设置按钮 (⚙️) 输入你的 API Key
+
+4. **启动开发服务器**
    ```bash
    npm run dev
    ```
    
    应用将在 http://localhost:5173 启动
 
-4. **构建生产版本**
+5. **构建生产版本**
    ```bash
    npm run build
    ```
 
-5. **预览生产版本**
+6. **预览生产版本**
    ```bash
    npm run preview
    ```
@@ -102,10 +108,26 @@ RoadStories 是一款基于人工智能的智能旅游伴侣应用，通过输�
 
 ## 🔑 API 配置
 
-应用已预配置 Google AI API Key，可以直接使用。如需自定义 API Key：
+应用使用环境变量配置 Google AI API Key。
 
-1. 前往 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取 API Key
-2. 在应用中点击设置按钮 (⚙️) 输入你的自定义 API Key
+### 部署到 Zeabur 或其他平台：
+
+1. 在部署平台的环境变量设置中添加：
+   - **变量名**: `VITE_GOOGLE_API_KEY`
+   - **值**: `AIzaSyD1waMAp7vPC_x1cEQT6X5i-xEn7rpRxII`
+
+2. 重新部署应用
+
+### 本地开发：
+
+创建 `.env` 文件并添加：
+```
+VITE_GOOGLE_API_KEY=AIzaSyD1waMAp7vPC_x1cEQT6X5i-xEn7rpRxII
+```
+
+### 用户自定义：
+
+用户仍可在应用设置中输入自定义 API Key 来覆盖默认设置。
 
 ### 所需服务：
 - **Gemini API**: 用于生成旅游路线和文本内容

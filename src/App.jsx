@@ -92,7 +92,7 @@ export default function RoadStoriesApp() {
 
  const [showSettings, setShowSettings] = useState(false);
  const [userApiKey, setUserApiKey] = useState('');
- const apiKey = "AIzaSyD1waMAp7vPC_x1cEQT6X5i-xEn7rpRxII"; 
+ const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || ""; 
 
  const getApiKey = useCallback(() => userApiKey.trim() || apiKey, [userApiKey]);
 
