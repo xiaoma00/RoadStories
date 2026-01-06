@@ -71,6 +71,7 @@ export default function RoadStoriesApp() {
  const [errorMessage, setErrorMessage] = useState(null);
  const [viewMode, setViewMode] = useState('dashboard');
  const [gpsMode, setGpsMode] = useState(false);
+ const [isGettingLocation, setIsGettingLocation] = useState(false);
  
  const [isGeneratingDeepDive, setIsGeneratingDeepDive] = useState(false);
  const [deepDiveText, setDeepDiveText] = useState('');
@@ -94,7 +95,7 @@ export default function RoadStoriesApp() {
  const [userApiKey, setUserApiKey] = useState('');
  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || ""; 
 
- const getApiKey = useCallback(() => userApiKey.trim() || apiKey, [userApiKey]);
+ const getApiKey = useCallback(() => userApiKey.trim() || apiKey, [userApiKey, apiKey]);
 
  // --- 自动补齐逻辑 ---
  useEffect(() => {
@@ -144,6 +145,11 @@ export default function RoadStoriesApp() {
    document.addEventListener("mousedown", handleClickOutside);
    return () => document.removeEventListener("mousedown", handleClickOutside);
  }, []);
+
+ // Hide suggestions while a generation is in progress
+ useEffect(() => {
+   if (isGenerating) setShowSuggestions(false);
+ }, [isGenerating]);
 
  // --- API: 生成行程 ---
  const handleGenerateTour = async (overrideQuery = null) => {
@@ -197,6 +203,38 @@ export default function RoadStoriesApp() {
    } finally {
      setIsGenerating(false);
    }
+ };
+
+ const handleUseCurrentLocation = () => {
+   if (!navigator.geolocation) {
+     setErrorMessage('浏览器不支持定位功能。');
+     return;
+   }
+   setIsGettingLocation(true);
+   setErrorMessage(null);
+   navigator.geolocation.getCurrentPosition(async (pos) => {
+     const { latitude, longitude } = pos.coords;
+     let address = `lat:${latitude.toFixed(5)},lng:${longitude.toFixed(5)}`;
+     try {
+       const key = getApiKey();
+       if (key) {
+         const resp = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${key}`);
+         if (resp.ok) {
+           const data = await resp.json();
+           address = data.results?.[0]?.formatted_address || address;
+         }
+       }
+     } catch (e) {
+       console.warn("Reverse geocode failed", e);
+     } finally {
+       setIsGettingLocation(false);
+       setLocationQuery(address);
+       handleGenerateTour(address);
+     }
+   }, (err) => {
+     setIsGettingLocation(false);
+     setErrorMessage('获取当前位置失败：' + err.message);
+   }, { enableHighAccuracy: true, timeout: 10000 });
  };
 
  // --- API: 扩展行程 ---
@@ -478,9 +516,22 @@ export default function RoadStoriesApp() {
          <div className="flex flex-col gap-6 mt-12 text-center animate-in fade-in slide-in-from-bottom-4">
            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">你想去哪里听故事？</h2>
            <div className="relative" ref={suggestionRef}>
-             <Search className="absolute left-4 top-6 -translate-y-1/2 text-slate-500 z-10" />
-             <input type="text" placeholder="例如：杭州西湖、Tokyo Tower..." className="block w-full pl-12 pr-24 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-lg focus:ring-2 focus:ring-amber-500 outline-none shadow-xl transition-all" value={locationQuery} onChange={(e) => { setLocationQuery(e.target.value); setShowSuggestions(true); }} onFocus={() => setShowSuggestions(true)} onKeyDown={(e) => e.key === 'Enter' && handleGenerateTour()} />
-             <button onClick={() => handleGenerateTour()} disabled={isGenerating || !locationQuery} className="absolute right-2 top-2 bottom-2 bg-amber-500 text-slate-900 font-bold px-6 rounded-xl disabled:opacity-50 z-10">{isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : "出发"}</button>
+             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 z-10" />
+             <input
+               type="text"
+               placeholder="例如：杭州西湖、Tokyo Tower..."
+               className="block w-full pl-12 pr-44 md:pr-56 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-lg focus:ring-2 focus:ring-amber-500 outline-none shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+               value={locationQuery}
+               onChange={(e) => { setLocationQuery(e.target.value); !isGenerating && setShowSuggestions(true); }}
+               onFocus={() => !isGenerating && setShowSuggestions(true)}
+               onKeyDown={(e) => e.key === 'Enter' && !isGenerating && handleGenerateTour()}
+               disabled={isGenerating}
+             />
+
+             <div className="absolute right-2 top-2 bottom-2 z-10 flex items-center gap-2">
+               <button onClick={handleUseCurrentLocation} disabled={isGettingLocation || isGenerating} title="使用当前位置" className="hidden sm:inline-flex bg-slate-700 text-slate-200 px-3 py-2 rounded-xl items-center gap-2 disabled:opacity-50">{isGettingLocation ? <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> : <LocateFixed className="w-4 h-4 text-amber-400" />}</button>
+               <button onClick={() => handleGenerateTour()} disabled={isGenerating || !locationQuery} className="bg-amber-500 text-slate-900 font-bold px-6 py-2 rounded-xl disabled:opacity-50">{isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : "出发"}</button>
+             </div>
              {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
                <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl z-50 animate-in fade-in slide-in-from-top-2">
                  {isLoadingSuggestions ? <div className="p-4 flex items-center justify-center gap-2 text-slate-400"><Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">正在搜寻地点...</span></div> : (
