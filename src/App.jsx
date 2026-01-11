@@ -528,8 +528,8 @@ export default function RoadStoriesApp() {
                disabled={isGenerating}
              />
 
-             <div className="absolute right-2 top-2 bottom-2 z-10 flex items-center gap-2">
-               <button onClick={handleUseCurrentLocation} disabled={isGettingLocation || isGenerating} title="使用当前位置" className="hidden sm:inline-flex bg-slate-700 text-slate-200 px-3 py-2 rounded-xl items-center gap-2 disabled:opacity-50">{isGettingLocation ? <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> : <LocateFixed className="w-4 h-4 text-amber-400" />}</button>
+              <div className="absolute right-2 top-2 bottom-2 z-10 flex items-center gap-2">
+               <button onClick={handleUseCurrentLocation} disabled={isGettingLocation || isGenerating} title="使用当前位置" className="inline-flex bg-slate-700 text-slate-200 px-3 py-2 rounded-xl items-center gap-2 disabled:opacity-50">{isGettingLocation ? <Loader2 className="w-4 h-4 animate-spin text-amber-400" /> : <LocateFixed className="w-4 h-4 text-amber-400" />}</button>
                <button onClick={() => handleGenerateTour()} disabled={isGenerating || !locationQuery} className="bg-amber-500 text-slate-900 font-bold px-6 py-2 rounded-xl disabled:opacity-50">{isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : "出发"}</button>
              </div>
              {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) && (
